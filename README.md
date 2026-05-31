@@ -1,99 +1,110 @@
-# 📊 PRB222 — Variance Swap & Réplication par Options Européennes
+# Variance Swap Pricing under Stochastic Volatility
 
-Projet numérique portant sur la valorisation d'un **Variance Swap** dans un modèle à volatilité stochastique, et sa réplication statique par un continuum d'options vanilles.
+> 🚀 **Personal project**, done independently outside coursework.
 
----
-
-## 🎯 Objectif
-
-Calculer et comparer :
-- **VS_théo** : variance swap théorique (formule fermée)
-- **VS_réel** : variance swap réel (variance réalisée discrète, Monte Carlo)
-
-Via deux estimateurs MC (standard et antithétique), puis étudier la réplication par options européennes.
+Pricing of **Variance Swaps** under a stochastic volatility model, with comparison between the theoretical (continuous) and real (discrete) variance swap, and a static replication result via a continuum of European options.
 
 ---
 
-## 📂 Structure
+## Products
 
-```
-├── variance_swap_commented.py   # Script principal commenté
-```
+### Theoretical Variance Swap
+$$VS^{\text{theo}} = e^{-rT}\mathbb{E}\left[\frac{1}{T}\int_0^T \sigma^2(s)\*ds - K^2\right]$$
 
----
-
-## ⚙️ Modèle
-
-Modèle à volatilité stochastique (type log-normal sur σ) :
-
-```
-dS(t) = S(t)(r dt + σ(t) dW(t))
-dσ(t) = σ(t) ν dZ(t)
-d<W,Z>_t = ρ dt
-```
-
-La formule fermée de σ(t) est :
-
-```
-σ(t) = σ₀ · exp(ν·Z(t) − 0.5·ν²·t)
-```
-
-Et le prix théorique :
-
-```
-VS_théo = e^{-rT} · (σ₀² · (exp(ν²T) − 1) / ν² − K²)
-```
+### Real (Discrete) Variance Swap
+$$VS^{\text{real}} = e^{-rT}\mathbb{E}\left[\frac{1}{T}\sum_{i=1}^{N}\ln\left(\frac{S(t_i)}{S(t_{i-1})}\right)^{2} - K^2\right]$$
 
 ---
 
-## ⚙️ Paramètres
+## Model
 
-| Paramètre | Valeur |
-|-----------|--------|
-| `S0` | 1 |
-| `K` | 0.35 |
-| `T` | 3 mois |
-| `r` | 0.01 |
+Log-normal stochastic volatility model:
+
+$$dS(t) = S(t)\left(rdt + \sigma(t)\*dW(t)\right)$$
+
+$$d\sigma(t) = \sigma(t)\nu\*dZ(t), \quad d\langle W,Z\rangle_t = \rho\*dt$$
+
+**Closed-form solution for σ(t):**
+$$\sigma(t) = \sigma_0 \exp\left(\nu Z(t) - \tfrac{1}{2}\nu^2 t\right)$$
+
+**Closed-form price (theoretical swap):**
+$$VS^{\text{theo}} = e^{-rT}\left(\sigma_0^2\frac{e^{\nu^2 T}-1}{\nu^2} - K^2\right)$$
+
+---
+
+## Parameters
+
+| Parameter | Value |
+|-----------|-------|
+| `S₀` | 1 |
 | `σ₀` | 0.35 |
 | `ν` | 0.8 |
-| `ρ` | -0.5 |
-| `N` (pas) | 63 (dt = 1/252) |
+| `ρ` | −0.5 |
+| `K` | 0.35 |
+| `r` | 0.01 |
+| `T` | 3 months |
+| `N` (steps) | 63 (dt = 1/252) |
 
-> Les simulations utilisent uniquement des lois **Uniformes** via la méthode de Box-Muller.
+> All simulations use **Uniform random variables only** via Box-Muller transform.
 
 ---
 
-## 📋 Questions traitées
+## Variance reduction
 
-| Q | Contenu |
+### Antithetic variables
+For each draw $(\varepsilon_1, \varepsilon_2)$, also evaluate at $(-\varepsilon_1, -\varepsilon_2)$:
+
+$$\hat{VS} = \frac{1}{2}\left(VS(\varepsilon) + VS(-\varepsilon)\right)$$
+
+---
+
+## Key results
+
+**Effect of ν:**
+
+- $VS^{\text{real}}$ increases with $\nu$: higher vol-of-vol → larger realised variance
+- The gap $VS^{\text{real}} - VS^{\text{theo}}$ widens with $\nu$ (discrete approximation less accurate)
+
+**Effect of ρ:**
+
+- Both $VS^{\text{real}}$ and $VS^{\text{theo}}$ are **independent of ρ**: the integrated variance $\int_0^T \sigma^2(s)\,ds$ does not depend on the correlation between $W$ and $Z$
+- The difference $VS^{\text{real}} - VS^{\text{theo}}$ remains roughly constant across ρ
+
+**Static replication (Q12):**
+$$VS^{\text{theo}} = \frac{2}{T}\left(\int_0^{S_0 e^{rT}} \frac{P(S_0,k)}{k^2}\*dk + \int_{S_0 e^{rT}}^{\infty} \frac{C(S_0,k)}{k^2}\*dk\right) - e^{-rT}K^2$$
+
+The variance swap can be replicated **statically** by a continuum of OTM puts and calls weighted by $1/k^2$.
+
+---
+
+## Topics covered
+
+| Q | Content |
 |---|---------|
-| Q1 | Solution de l'EDS de S(t) |
-| Q2 | VS déjà commencé (t0 < 0) |
-| Q3 | Pourquoi B&S n'est pas pertinent pour ce produit |
-| Q4 | Calcul de σ(t) et formule fermée de VS_théo |
-| Q5 | Simulation des BM corrélés (W, Z) |
-| Q6 | Simulation de (S(t), σ(t)) + MC classique |
-| Q7 | Variables antithétiques + comparaison des IC à 90% |
-| Q8 | VS en fonction de ν ∈ [0, 1.5] |
-| Q9 | VS en fonction de ρ ∈ ]−1, 1[ |
-| Q10 | Formule de Taylor intégrale (décomposition put/call) |
-| Q11 | Expression de la variance intégrée via Itô |
-| Q12 | Réplication statique du VS par puts et calls (1/k²) |
-| Q15 | Densité de S(T) en fonction de ν |
-| Q16 | Densité de S(T) en fonction de ρ (skew) |
+| Q1 | Solution of the SDE for S(t) |
+| Q2 | Already-started variance swap (t₀ < 0) |
+| Q3 | Why Black-Scholes is not suitable |
+| Q4 | Closed-form σ(t) and VS_theo |
+| Q5 | Simulation of correlated BM (W, Z) |
+| Q6 | Simulation of (S(t), σ(t)) + MC pricing |
+| Q7 | Antithetic variables + 90% CI comparison |
+| Q8 | VS vs ν ∈ [0, 1.5] |
+| Q9 | VS vs ρ ∈ ]−1, 1[ |
+| Q10 | Taylor-integral decomposition (put/call) |
+| Q11 | Itô derivation of integrated variance |
+| Q12 | Static replication by puts and calls (1/k²) |
+| Q15 | Density of S(T) vs ν |
+| Q16 | Density of S(T) vs ρ (skew effect) |
 
 ---
 
-## 🚀 Lancement
+## Run
 
 ```bash
 pip install numpy matplotlib
 python variance_swap_commented.py
 ```
 
----
+## Dependencies
 
-## 📦 Dépendances
-
-- `numpy`
-- `matplotlib`
+`numpy` · `matplotlib`
