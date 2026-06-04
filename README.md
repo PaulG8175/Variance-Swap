@@ -1,6 +1,6 @@
 # Variance Swap Pricing under Stochastic Volatility
 
-> 🚀 **Personal project**, done independently outside coursework.
+> **Personal project**, done independently outside coursework.
 
 Pricing of **Variance Swaps** under a stochastic volatility model, with comparison between the theoretical (continuous) and real (discrete) variance swap, and a static replication result via a continuum of European options.
 
@@ -20,15 +20,15 @@ $$VS^{\text{real}} = e^{-rT}\mathbb{E}\left[\frac{1}{T}\sum_{i=1}^{N}\ln\left(\f
 
 Log-normal stochastic volatility model:
 
-$$dS(t) = S(t)\left(rdt + \sigma(t)\*dW(t)\right)$$
+$$dS(t) = S(t)\left(r\*dt + \sigma(t)\*dW(t)\right)$$
 
-$$d\sigma(t) = \sigma(t)\nu\*dZ(t), \quad d\langle W,Z\rangle_t = \rho\*dt$$
+$$d\sigma(t) = \sigma(t)\*\nu\*dZ(t), \quad d\langle W,Z\rangle_t = \rho\*dt$$
 
 **Closed-form solution for σ(t):**
 $$\sigma(t) = \sigma_0 \exp\left(\nu Z(t) - \tfrac{1}{2}\nu^2 t\right)$$
 
 **Closed-form price (theoretical swap):**
-$$VS^{\text{theo}} = e^{-rT}\left(\sigma_0^2\frac{e^{\nu^2 T}-1}{\nu^2} - K^2\right)$$
+$$VS^{\text{theo}} = e^{-rT}\left(\sigma_0^2\*\frac{e^{\nu^2 T}-1}{\nu^2} - K^2\right)$$
 
 ---
 
@@ -91,7 +91,7 @@ The variance swap can be replicated **statically** by a continuum of OTM puts an
 | Q8 | VS vs ν ∈ [0, 1.5] |
 | Q9 | VS vs ρ ∈ ]−1, 1[ |
 | Q10 | Taylor-integral decomposition (put/call) |
-| Q11 | Itô derivation of integrated variance |
+| Q11 | Ito derivation of integrated variance |
 | Q12 | Static replication by puts and calls (1/k²) |
 | Q15 | Density of S(T) vs ν |
 | Q16 | Density of S(T) vs ρ (skew effect) |
